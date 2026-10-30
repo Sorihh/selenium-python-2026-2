@@ -1,111 +1,123 @@
-# Taller de automatización de pruebas con Selenium, Python, Cucumber, Gherkin, y el patrón Page Object Model (POM).
+# Taller de automatización de pruebas: Selenium + Python + Behave
 
-## Instalación de Herramientas
+**Estudiante:** Juan David Soriano
+**Fecha:** 29 de octubre de 2026
+**Repositorio base:** [MrM0ra/selenium-python-2026-2](https://github.com/MrM0ra/selenium-python-2026-2)
 
-### Antes de iniciar, asegúrate de tener instaladas las siguientes herramientas:
-    - Navegador Google Chrome actualizado a su última versión (https://www.google.com/intl/es_us/chrome/)
-	- Python (https://www.python.org/downloads/) 
-	- Selenium (pip install selenium)
-	- WebDriver para el navegador (Chrome o Firefox)
-	- ChromeDriver (https://googlechromelabs.github.io/chrome-for-testing/#stable)
-        - descargar el archivo chromedriver correspondiente a su sistema operativo
-        - extraer los archivos de la carpeta y copiar el archivo webdriver.exe en la raiz del proyecto
-	- Asegurarse de que el archivo del WebDriver.exe esté en el mismo directorio del proyecto.
-	- Behave para Cucumber con Python (pip install behave)
-	- Cucumber para casos de prueba con Gherkin (Esto ya viene con Behave.)
-
-### Para correr los tests, usa el comando:
-	debes correrlo en la terminal o consola de comandos desde la raíz de tu proyecto.
-	- behave features/login.feature 
-	- behave features/shopping_cart.feature 
-
-# 🧪 Pruebas Automatizadas con Behave (BDD)
-
-Este proyecto utiliza **BDD (Behavior Driven Development)** con **Behave** para escribir pruebas legibles por humanos, utilizando **Gherkin** como lenguaje y **Selenium** para interactuar con la interfaz web. El diseño sigue el **Page Object Model (POM)**.
+Pruebas automatizadas de front-end escritas en **Gherkin**, ejecutadas con **Behave** y **Selenium** sobre Google Chrome, siguiendo el patrón **Page Object Model (POM)**.
 
 ---
 
-## 🚀 Pasos para crear una nueva prueba
+## Estructura agregada al proyecto
 
-### 1. Crear o identificar la funcionalidad a probar
-Define qué funcionalidad vas a automatizar. Por ejemplo: login, agregar productos al carrito, filtrado de ítems, etc.
-
-### 2. Crear o actualizar la clase de página (`.py`)
-Usa el patrón **Page Object Model**. Crea una clase para la página web si no existe, y define los métodos necesarios.
-
-```bash
-project/
-└── pages/
-    ├── login_page.py
-    ├── inventory_page.py
-    └── base_page.py
+```
+selenium-python-2026-2/
+├── features/
+│   ├── lobby_login.feature          # Ejercicio 1
+│   ├── imdb.feature                 # Ejercicio 2
+│   └── steps/
+│       ├── lobby_login_steps.py
+│       └── imdb_search_steps.py
+├── pages/
+│   ├── base_page.py                 # (del repositorio base)
+│   ├── lobby_login_page.py
+│   ├── lobby_dashboard_page.py
+│   ├── imdb_home_page.py
+│   ├── imdb_results_page.py
+│   └── imdb_movie_page.py
+└── evidencias/
+    └── imdb_resultado.png
 ```
 
-### 3. Crear el archivo `.feature`
-Escribe el escenario en lenguaje Gherkin. Usa `Feature`, `Scenario`, `Given`, `When`, `Then` y `And`.
+Todas las páginas heredan de `BasePage` y usan sus métodos `find_element`, `find_elements`, `click` y `enter_text`.
+
+---
+
+## Ejercicio 1: Lobby global
+
+**Sitio:** https://lobby-global.vercel.app/
+
+| Página (POM) | Elementos | Selector |
+|---|---|---|
+| `LobbyLoginPage` | Campo de nombre | `By.ID, "username"` |
+| | Botón "Entrar a la sala" | `By.ID, "btn-login"` |
+| | Mensaje de error | `By.CLASS_NAME, "error-message"` |
+| `LobbyDashboardPage` | Nombres de participantes | `By.CLASS_NAME, "participant-name"` |
 
 ```gherkin
-Feature: Add to cart functionality
+Feature: Login feature
+    Scenario: Ingresar con un nombre unico a la lobby
+        Given El usuario se encuentra en la pagina de login
+        When El usuario ingresa con el nombre "SORI"
+        Then El nombre del usuario "SORI" aparece en el dashboard
 
-  Scenario: User adds a product to the cart
-    Given I am logged in on the inventory page
-    When I add the product "Sauce Labs Backpack" to the cart
-    Then I should see 1 item in the cart
-```
-
-Guárdalo en la carpeta `features/`.
-
-### 4. Crear el archivo de `steps`
-Aquí implementas en Python lo que hacen los pasos del `.feature`. Usa las clases del POM para interactuar con la UI.
-
-```bash
-project/
-└── features/
-    ├── steps/
-    │   └── cart_steps.py
-    └── shopping_cart.feature
-```
-
-Ejemplo de step:
-
-```python
-@when('I add the product "{product_name}" to the cart')
-def step_impl(context, product_name):
-    context.inventory_page.add_product_to_cart(product_name)
-```
-
-### 5. Ejecutar las pruebas
-
-En la terminal, dentro del proyecto, ejecuta:
-
-```bash
-behave
-```
-
-También puedes correr un archivo específico:
-
-```bash
-behave features/shopping_cart.feature
+    Scenario: Validar mensaje de error con un nombre que contiene espacios
+        Given El usuario se encuentra en la pagina de login
+        When El usuario intenta ingresar con un nombre con espacios "Juan Soriano"
+        Then Se muestra el mensaje de error "Usa entre 3 y 20 caracteres"
+        And El usuario sigue en la pagina de login
 ```
 
 ---
 
-# 🧑‍🏫 Ejercicios para el Taller de Pruebas Automatizadas con Selenium
+## Ejercicio 2: Búsqueda en IMDb
 
-A continuación se presentan dos ejercicios prácticos que los estudiantes deberán realizar durante el taller. Estos están diseñados para reforzar conceptos clave como la interacción con elementos web, localización por selectores y verificación de resultados.
+**Sitio:** https://www.imdb.com
+
+| Página (POM) | Elementos | Selector |
+|---|---|---|
+| `ImdbHomePage` | Buscador | `By.ID, "suggestion-search"` |
+| | Botón de búsqueda | `By.ID, "suggestion-search-button"` |
+| `ImdbResultsPage` | Primer resultado de títulos | `By.CSS_SELECTOR, '[data-testid="find-results-section-title"] a.ipc-title-link-wrapper'` |
+| `ImdbMoviePage` | Título | `By.CSS_SELECTOR, '[data-testid="hero__primary-text"]'` |
+| | Calificación | `By.CSS_SELECTOR, '[data-testid="hero-rating-bar__aggregate-rating__score"] span'` |
+
+```gherkin
+Feature: Busqueda de peliculas en IMDb
+    Scenario: Buscar una pelicula y validar su calificacion
+        Given El usuario se encuentra en la pagina principal de IMDb
+        When El usuario busca la pelicula "Pulp Fiction"
+        And El usuario abre el primer resultado
+        Then Se muestra la pagina de la pelicula "Pulp Fiction"
+        And Se muestra la calificacion de la pelicula
+```
+
+La calificación se valida como un número entre 0 y 10 (no un valor fijo), porque cambia con el tiempo.
+
+### Problemas encontrados y cómo se resolvieron
+
+- **IMDb pedía verificación de humano:** al detectar el navegador automatizado, IMDb mostraba una verificación y el buscador nunca aparecía (`TimeoutException`). Se resolvió completando la verificación manualmente en la ventana de Chrome durante la ejecución; después la prueba continuó sola. Si vuelve a aparecer, hay que resolverla dentro de los 20 segundos de espera de `BasePage`.
+- **La calificación llegaba vacía (`''`):** IMDb tiene la barra de calificación duplicada (versión escritorio y móvil) y una está oculta. Se cambió `get_rating()` para recorrer todas las coincidencias con `find_elements` y leer `textContent`, que funciona aunque el elemento esté oculto.
+
+### Evidencia de ejecución
+
+```bash
+behave --no-capture features/imdb.feature
+```
+
+![Ejecución exitosa de la prueba de IMDb](evidencias/imdb_resultado.png)
+
+Resultado: **1 feature passed, 1 scenario passed, 5 steps passed**, con calificación obtenida de **8,8**.
 
 ---
-## 🧪 Ejercicio 1: Ingresar a una lobby correctamente y validar mensaje de error
-### 💡 Sitio:
-https://lobby-global.vercel.app/
 
-### 🎯 Escenarios:
-- Ingresar con un nombre único a la lobby
-- Validar mensaje de error al intentar ingresar con un nombre de usuario que contiene espacios
+## Cómo ejecutar las pruebas
 
-## 🧪 Ejercicio 2: Buscar una película en IMDb y validar su calificación
-### 💡 Sitio:
-https://www.imdb.com
+Requisitos: Google Chrome actualizado, `chromedriver.exe` de la misma versión en la raíz del proyecto, y:
 
-### 🎯 Escenario:
-Buscar la película “Pulp fiction”, abrir el primer resultado y verificar que en la página se muestre correctamente la calificación (rating).
+```bash
+pip install selenium behave
+```
+
+Desde la raíz del proyecto:
+
+```bash
+behave features/lobby_login.feature
+behave --no-capture features/imdb.feature
+```
+
+Para verificar que todos los pasos del feature están implementados sin abrir el navegador:
+
+```bash
+behave --dry-run features/imdb.feature
+```
